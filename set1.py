@@ -1,4 +1,6 @@
 import binascii as ba
+from typing import List
+
 import numpy as np
 import string
 import re
@@ -33,34 +35,44 @@ def fixed_xor(hex_string1: str, hex_string2: str):
     return xor_hex
 
 
-def onebyte_xor(hexstr, char_int):
-    assert isinstance(hexstr, str), "`hexstr` is not str type"
+def onebyte_xor(hex_string: str, char_int: int):
+    """Bitwise XOR a hex string representation against a single byte as integer and return the bytes object"""
+    assert isinstance(hex_string, str), "`hexstr` is not str type"
     assert isinstance(char_int, int), "`char_int` is not int type"
     assert char_int in range(256), "`char_int` is not a single byte"
-    str_byte = ba.a2b_hex(hexstr)
-    xor_int = [int(char_int ^ i) for i in str_byte]
+    string_byte = ba.a2b_hex(hex_string)
+    xor_int = [int(char_int ^ i) for i in string_byte]
     xor_hex = bytes(xor_int)
     return xor_hex
 
 
-def ascii_hex(byte_hex):
-    assert isinstance(byte_hex, bytes), "`byte_hex` is not bytes type"
-    num_ascii = sum([byte_hex[i] in range(32, 127) for i in range(len(byte_hex))])
-    return num_ascii / len(byte_hex)
-
-
-def letter_freq(string_in):
+def rfreq_letter(string_in: str):
+    """Get the relative frequency of each letter in a string as a list of doubles"""
     assert isinstance(string_in, str), "`string` is not str type"
     uppercase_in = string_in.upper()
-    counts = [len(re.findall(letter, uppercase_in)) for letter in string.ascii_uppercase]
-    freqs = [ct / len(string_in) for ct in counts]
-    return freqs
+    rfreqs = [uppercase_in.count(letter) / len(string_in) for letter in string.ascii_uppercase]
+    return rfreqs
+
+
+def rfreq_byte(bytes_in: bytes):
+    """Get the relative frequency of each byte in a bytes object as a list of doubles"""
+    assert isinstance(bytes_in, bytes), "`bytes_in` is not bytes type"
+    rfreqs = [bytes_in.count(i) / 256 for i in range(256)]
+    return rfreqs
+
+
+def ascii_hex(bytes_obj: bytes):
+    """Get the fraction of ASCII range bytes in a bytes object as a double"""
+    assert isinstance(bytes_obj, bytes), "`byte_hex` is not bytes type"
+    num_ascii = sum([bytes_obj[i] in range(32, 127) for i in range(len(bytes_obj))])
+    return num_ascii / len(bytes_obj)
 
 
 def rmse(list1, list2):
+    """Calculate the root mean squared error of two lists of numbers"""
     assert len(list1) == len(list2), "`list1` is not same length as `list2`"
-    sqe = [(x[0] - x[1]) ** 2 for x in zip(list1, list2)]
-    rms = sqrt(sum(sqe) / len(sqe))
+    arr1, arr2 = (np.array(num_list) for num_list in (list1, list2))
+    rms: float = np.mean((arr1 - arr2) ** 2)
     return rms
 
 
@@ -70,8 +82,10 @@ eng_freq = dict(
     W=2.360, X=0.150, Y=1.974, Z=0.074
 )
 
+# eng_freq_byte = eng_freq.
 
-def freq_rmse(string_in, freq_compare=list(eng_freq.values())):
-    string_freqs = letter_freq(string_in)
-    rms = rmse(string_freqs, freq_compare)
+
+def freq_rmse(string_in: str, freq_compare=list(eng_freq.values())):
+    string_rfreqs: List[float] = rfreq_letter(string_in)
+    rms: float = rmse(string_rfreqs, freq_compare)
     return rms
