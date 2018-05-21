@@ -49,8 +49,9 @@ def onebyte_xor(hex_string: str, char_int: int):
 def rfreq_letter(string_in: str):
     """Get the relative frequency of each letter in a string as a list of doubles"""
     assert isinstance(string_in, str), "`string` is not str type"
-    uppercase_in = string_in.upper()
-    rfreqs = [uppercase_in.count(letter) / len(string_in) for letter in string.ascii_uppercase]
+    letters_only = re.sub("[^A-z]", "", string_in)
+    uppercase_in = letters_only.upper()
+    rfreqs = [uppercase_in.count(letter) / len(letters_only) for letter in string.ascii_uppercase]
     return rfreqs
 
 
@@ -85,7 +86,14 @@ eng_freq = dict(
 # eng_freq_byte = eng_freq.
 
 
-def freq_rmse(string_in: str, freq_compare=list(eng_freq.values())):
+def freq_rmse(string_in: str, freq_compare: List[float] = list(eng_freq.values())):
+    """Calculate the rmse similarity between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     rms: float = rmse(string_rfreqs, freq_compare)
     return rms
+
+def freq_ols(string_in: str, freq_compare = list(eng_freq.values())):
+    """Calclate the least squares similarity between a string's letter frequency and English"""
+    string_rfreqs: List[float] = rfreq_letter(string_in)
+    ols: float = sum((np.array(string_rfreqs) - np.array(freq_compare)) ** 2)
+    return ols
