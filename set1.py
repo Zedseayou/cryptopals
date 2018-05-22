@@ -100,7 +100,7 @@ eng_freq = dict(
 # eng_freq_byte = eng_freq.
 
 
-def freq_rmse(string_in: str, freq_compare: List[float] = list(eng_freq.values())):
+def freq_rmse(string_in: str, freq_compare = np.array(list(eng_freq.values())) / 100):
     """Calculate the rmse similarity between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     rms: float = rmse(string_rfreqs, freq_compare)
@@ -112,7 +112,7 @@ def freq_ols(string_in: str, freq_compare = list(eng_freq.values())):
     ols: float = sum((np.array(string_rfreqs) - np.array(freq_compare)) ** 2)
     return ols
 
-def freq_BC(string_in: str, freq_compare: List[float] = list(eng_freq.values())):
+def freq_BC(string_in: str, freq_compare = np.array(list(eng_freq.values())) / 100):
     """Calculate the Bhattachandrya coefficient between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     bcoef: float = BC(string_rfreqs, freq_compare)
