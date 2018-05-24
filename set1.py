@@ -167,6 +167,24 @@ def repeat_xor(string_in: str, key: str):
     return xor_hex
 
 
+def int_to_binary(int_in: int):
+    """
+    Convert an integer representing one byte into its binary representation in string form, including leading zeroes.
+    :int_in: Integer between 0 and 255 to convert to binary representation.
+    :return: String of length 8 containing binary representation of input integer.
+    """
+    bin_out: str = bin(int_in)[2:].zfill(8)
+    return bin_out
+
+
+def str_to_binary(string_in: str):
+    """
+    Convert a character string to its binary representation in string form, including leading zeroes.
+    :param string_in:
+    :return:
+    """
+
+
 def hammming_dist(string1: str, string2: str):
     """
     Compute the Hamming distance between two strings, which is the number of differing bits.
@@ -174,7 +192,9 @@ def hammming_dist(string1: str, string2: str):
     :param string2:
     :return:
     """
-    assert len(string1) == len(string2)
+    assert len(string1) == len(string2), "String lengths are not equal"
+    "".join([int_to_binary(ord(c)) for c in "string"])
+    bin1 = np.array(list())
 
 
 
