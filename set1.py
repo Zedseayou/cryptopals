@@ -167,4 +167,14 @@ def repeat_xor(string_in: str, key: str):
     return xor_hex
 
 
+def hammming_dist(string1: str, string2: str):
+    """
+    Compute the Hamming distance between two strings, which is the number of differing bits.
+    :param string1:
+    :param string2:
+    :return:
+    """
+    assert len(string1) == len(string2)
+
+
 
