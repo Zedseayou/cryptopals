@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import string
 import re
+import itertools
 from math import sqrt
 
 
@@ -91,32 +92,37 @@ def BC(dist1, dist2):
     bcoef: float = sum(np.sqrt(arr1 * arr2))
     return bcoef
 
+
 eng_freq = dict(
     A=8.167, B=1.492, C=2.782, D=4.253, E=12.702, F=2.228, G=2.015, H=6.094, I=6.966, J=0.153, K=0.772,
     L=4.025, M=2.406, N=6.749, O=7.507, P=1.929, Q=0.095, R=5.987, S=6.327, T=9.056, U=2.758, V=0.978,
     W=2.360, X=0.150, Y=1.974, Z=0.074
 )
 
+
 # eng_freq_byte = eng_freq.
 
 
-def freq_rmse(string_in: str, freq_compare = np.array(list(eng_freq.values())) / 100):
+def freq_rmse(string_in: str, freq_compare=np.array(list(eng_freq.values())) / 100):
     """Calculate the rmse similarity between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     rms: float = rmse(string_rfreqs, freq_compare)
     return rms
 
-def freq_ols(string_in: str, freq_compare = list(eng_freq.values())):
+
+def freq_ols(string_in: str, freq_compare=list(eng_freq.values())):
     """Calclate the least squares similarity between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     ols: float = sum((np.array(string_rfreqs) - np.array(freq_compare)) ** 2)
     return ols
 
-def freq_BC(string_in: str, freq_compare = np.array(list(eng_freq.values())) / 100):
+
+def freq_BC(string_in: str, freq_compare=np.array(list(eng_freq.values())) / 100):
     """Calculate the Bhattachandrya coefficient between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     bcoef: float = BC(string_rfreqs, freq_compare)
     return bcoef
+
 
 def best_eng_onebyte(string_in: str):
     """
@@ -131,3 +137,34 @@ def best_eng_onebyte(string_in: str):
     df = df.assign(ascii_frac=df.xored_bytes.apply(ascii_hex))
     df = df.assign(xor_bcoef=df.xored_bytes.apply(lambda x: freq_BC(byte_to_str(x))))
     return df.iloc[df.xor_bcoef.idxmax()]
+
+
+def flatten(nested_list):
+    """
+    Flattens a nested list to a single list
+    :param nested_list:
+    :return: List with one layer of hierarchy removed
+    """
+    flat_list = [item for sublist in nested_list for item in sublist]
+    return flat_list
+
+
+def repeat_xor(string_in: str, key: str):
+    """
+    Encode a string using repeating-key XOR.
+    :param string_in: A plaintext ASCII string to be encrypted.
+    :param key: A plaintext ASCII key to encode the string with.
+    :return: A bytes object containing the encoded bytes, in hex representation
+    """
+    string_ints: List[int] = [i for i in bytes(string_in, "ASCII")]
+    key_ints: List[int] = [i for i in bytes(key, "ASCII")]
+    repetitions: int = len(string_ints) // len(key_ints)
+    remainder: int = len(string_ints) % len(key_ints)
+    rep_key_ints: List[int] = flatten(list(itertools.repeat(key_ints, times=repetitions))) + key_ints[0:remainder]
+    assert len(string_ints) == len(rep_key_ints), "Arrays are not equal length (internal bug)"
+    xor_int: List[int] = [int(i[0] ^ i[1]) for i in zip(string_ints, rep_key_ints)]
+    xor_hex = ba.b2a_hex(bytes(xor_int))
+    return xor_hex
+
+
+
