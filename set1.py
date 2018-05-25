@@ -183,7 +183,9 @@ def str_to_binary(string_in: str):
     :param string_in:
     :return:
     """
-
+    bin_chars = [int_to_binary(ord(c)) for c in string_in]
+    bin_str: str = "".join(bin_chars)
+    return bin_str
 
 def hammming_dist(string1: str, string2: str):
     """
@@ -192,9 +194,11 @@ def hammming_dist(string1: str, string2: str):
     :param string2:
     :return:
     """
-    assert len(string1) == len(string2), "String lengths are not equal"
-    "".join([int_to_binary(ord(c)) for c in "string"])
-    bin1 = np.array(list())
+    assert len(string2) == len(string1), "String lengths are not equal"
+    bin1: List[int] = [int(d) for d in str_to_binary(string1)]
+    bin2: List[int] = [int(d) for d in str_to_binary(string2)]
+    dist: int = sum(np.array(bin1) ^ np.array(bin2))
+    return dist
 
 
 
