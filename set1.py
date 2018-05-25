@@ -28,7 +28,7 @@ def byte_to_str(bytes_obj: bytes) -> str:
     return byte_string.rstrip("'").lstrip("b'")
 
 
-def fixed_xor(hex_string1: str, hex_string2: str):
+def fixed_xor(hex_string1: str, hex_string2: str) -> bytes:
     """Bitwise XOR two hex string representations together and return the bytes object"""
     assert len(hex_string1) == len(hex_string2), "`hex_string1` and `hex_string2` are not equal length"
     bytes1, bytes2 = (ba.a2b_hex(str) for str in [hex_string1, hex_string2])
@@ -37,7 +37,7 @@ def fixed_xor(hex_string1: str, hex_string2: str):
     return xor_hex
 
 
-def onebyte_xor(hex_string: str, char_int: int):
+def onebyte_xor(hex_string: str, char_int: int) -> bytes:
     """Bitwise XOR a hex string representation against a single byte as integer and return the bytes object"""
     assert isinstance(hex_string, str), "`hexstr` is not str type"
     assert isinstance(char_int, int), "`char_int` is not int type"
@@ -48,7 +48,7 @@ def onebyte_xor(hex_string: str, char_int: int):
     return xor_hex
 
 
-def rfreq_letter(string_in: str):
+def rfreq_letter(string_in: str) -> List[float]:
     """Get the relative frequency of each letter in a string as a list of doubles"""
     assert isinstance(string_in, str), "`string` is not str type"
     letters_only = re.sub("[^A-z]", "", string_in)
@@ -57,21 +57,21 @@ def rfreq_letter(string_in: str):
     return rfreqs
 
 
-def rfreq_byte(bytes_in: bytes):
+def rfreq_byte(bytes_in: bytes) -> List[float]:
     """Get the relative frequency of each byte in a bytes object as a list of doubles"""
     assert isinstance(bytes_in, bytes), "`bytes_in` is not bytes type"
     rfreqs = [bytes_in.count(i) / 256 for i in range(256)]
     return rfreqs
 
 
-def ascii_hex(bytes_obj: bytes):
+def ascii_hex(bytes_obj: bytes) -> float:
     """Get the fraction of ASCII range bytes in a bytes object as a double"""
     assert isinstance(bytes_obj, bytes), "`byte_hex` is not bytes type"
-    num_ascii = sum([bytes_obj[i] in range(32, 127) for i in range(len(bytes_obj))])
+    num_ascii: int = sum([bytes_obj[i] in range(32, 127) for i in range(len(bytes_obj))])
     return num_ascii / len(bytes_obj)
 
 
-def rmse(list1, list2):
+def rmse(list1, list2) -> float:
     """Calculate the root mean squared error of two lists of numbers"""
     assert len(list1) == len(list2), "`list1` is not same length as `list2`"
     arr1, arr2 = (np.array(num_list) for num_list in (list1, list2))
@@ -79,7 +79,7 @@ def rmse(list1, list2):
     return rms
 
 
-def BC(dist1, dist2):
+def BC(dist1, dist2) -> float:
     """
     Calculate the Bhattarcharya distance between two discrete distributions. Distributions should be supplied as 1D
     NumPy arrays of equal length, or else as lists which will be converted to NumPy arrays.
@@ -100,31 +100,28 @@ eng_freq = dict(
 )
 
 
-# eng_freq_byte = eng_freq.
-
-
-def freq_rmse(string_in: str, freq_compare=np.array(list(eng_freq.values())) / 100):
+def freq_rmse(string_in: str, freq_compare=np.array(list(eng_freq.values())) / 100) -> float:
     """Calculate the rmse similarity between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     rms: float = rmse(string_rfreqs, freq_compare)
     return rms
 
 
-def freq_ols(string_in: str, freq_compare=list(eng_freq.values())):
+def freq_ols(string_in: str, freq_compare=list(eng_freq.values())) -> float:
     """Calclate the least squares similarity between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     ols: float = sum((np.array(string_rfreqs) - np.array(freq_compare)) ** 2)
     return ols
 
 
-def freq_BC(string_in: str, freq_compare=np.array(list(eng_freq.values())) / 100):
+def freq_BC(string_in: str, freq_compare=np.array(list(eng_freq.values())) / 100) -> float:
     """Calculate the Bhattachandrya coefficient between a string's letter frequency and English"""
     string_rfreqs: List[float] = rfreq_letter(string_in)
     bcoef: float = BC(string_rfreqs, freq_compare)
     return bcoef
 
 
-def best_eng_onebyte(string_in: str):
+def best_eng_onebyte(string_in: str) -> pd.Series:
     """
     Return the output from the best single-byte XOR for a string.
     :param string_in:
@@ -139,7 +136,7 @@ def best_eng_onebyte(string_in: str):
     return df.iloc[df.xor_bcoef.idxmax()]
 
 
-def flatten(nested_list):
+def flatten(nested_list: List) -> List:
     """
     Flattens a nested list to a single list
     :param nested_list:
@@ -149,7 +146,7 @@ def flatten(nested_list):
     return flat_list
 
 
-def repeat_xor(string_in: str, key: str):
+def repeat_xor(string_in: str, key: str) -> bytes:
     """
     Encode a string using repeating-key XOR.
     :param string_in: A plaintext ASCII string to be encrypted.
@@ -167,7 +164,7 @@ def repeat_xor(string_in: str, key: str):
     return xor_hex
 
 
-def int_to_binary(int_in: int):
+def int_to_binary(int_in: int) -> str:
     """
     Convert an integer representing one byte into its binary representation in string form, including leading zeroes.
     :int_in: Integer between 0 and 255 to convert to binary representation.
@@ -177,7 +174,7 @@ def int_to_binary(int_in: int):
     return bin_out
 
 
-def str_to_binary(string_in: str):
+def str_to_binary(string_in: str) -> str:
     """
     Convert a character string to its binary representation in string form, including leading zeroes.
     :param string_in:
