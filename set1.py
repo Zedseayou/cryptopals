@@ -16,36 +16,28 @@ def hex_to_b64(hex_string: str) -> str:
     return b64_string
 
 
-def hex_to_arr(hex_string: str):
-    """Convert a bytes object to a NumPy array of integers, one per byte"""
-    int_array = np.array([i for i in ba.a2b_hex(hex_string)])
-    return int_array
-
-
 def byte_to_str(bytes_obj: bytes) -> str:
     """Convert bytes object to string, removing header and trailing quote"""
     byte_string: str = str(bytes_obj)
     return byte_string.rstrip("'").lstrip("b'")
 
 
-def fixed_xor(hex_string1: str, hex_string2: str) -> bytes:
+def fixed_xor(bytes1: bytes, bytes2: bytes) -> bytes:
     """Bitwise XOR two hex string representations together and return the bytes object"""
-    assert len(hex_string1) == len(hex_string2), "`hex_string1` and `hex_string2` are not equal length"
-    bytes1, bytes2 = (ba.a2b_hex(str) for str in [hex_string1, hex_string2])
-    xor_int = [int(i[0] ^ i[1]) for i in zip(bytes1, bytes2)]
-    xor_hex = ba.b2a_hex(bytes(xor_int))
-    return xor_hex
+    assert len(bytes1) == len(bytes2), "Input lengths are not equal"
+    xor_int = np.array(list(bytes1)) ^ np.array(list(bytes2))
+    xor_bytes: bytes = bytes(list(xor_int))
+    return xor_bytes
 
 
-def onebyte_xor(hex_string: str, char_int: int) -> bytes:
-    """Bitwise XOR a hex string representation against a single byte as integer and return the bytes object"""
-    assert isinstance(hex_string, str), "`hexstr` is not str type"
-    assert isinstance(char_int, int), "`char_int` is not int type"
-    assert char_int in range(256), "`char_int` is not a single byte"
-    string_byte = ba.a2b_hex(hex_string)
-    xor_int = [int(char_int ^ i) for i in string_byte]
-    xor_hex = bytes(xor_int)
-    return xor_hex
+def onebyte_xor(bytes_obj: bytes, one_byte: int) -> bytes:
+    """Bitwise XOR a bytes object representation against a single byte as integer and return the bytes object"""
+    assert isinstance(bytes_obj, bytes), "`bytes_obj` is not str type"
+    assert isinstance(one_byte, int), "`one_byte` is not int type"
+    assert one_byte in range(256), "`one_byte` is not a single byte"
+    xor_int = [int(one_byte ^ i) for i in bytes_obj]
+    xor_bytes = bytes(xor_int)
+    return xor_bytes
 
 
 def rfreq_letter(string_in: str) -> List[float]:
@@ -121,16 +113,17 @@ def freq_BC(string_in: str, freq_compare=np.array(list(eng_freq.values())) / 100
     return bcoef
 
 
-def best_eng_onebyte(string_in: str) -> pd.Series:
+def best_eng_onebyte(bytes_obj: bytes) -> pd.Series:
     """
     Return the output from the best single-byte XOR for a string.
-    :param string_in:
+    :param bytes_obj:
     :return: A series containing the XOR integer, character, output, fraction of ASCII characters in the output, and
     the Bhattachandrya coefficient for the XOR output letter frequency as compared to English.
     """
+
     df = pd.DataFrame({"xor_int": np.array(range(32, 127))})
     df = df.assign(xor_chr=df.xor_int.apply(lambda x: byte_to_str(bytes([x]))))
-    df = df.assign(xored_bytes=df.xor_int.apply(lambda x: onebyte_xor(string_in, x)))
+    df = df.assign(xored_bytes=df.xor_int.apply(lambda x: onebyte_xor(bytes_obj, x)))
     df = df.assign(ascii_frac=df.xored_bytes.apply(ascii_hex))
     df = df.assign(xor_bcoef=df.xored_bytes.apply(lambda x: freq_BC(byte_to_str(x))))
     return df.iloc[df.xor_bcoef.idxmax()]
