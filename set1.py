@@ -184,18 +184,37 @@ def str_to_binary(string_in: str) -> str:
     bin_str: str = "".join(bin_chars)
     return bin_str
 
-def hammming_dist(string1: str, string2: str):
+
+def hamming_dist(bytes_in1, bytes_in2) -> int:
     """
-    Compute the Hamming distance between two strings, which is the number of differing bits.
-    :param string1:
-    :param string2:
-    :return:
+    Compute the Hamming distance between two objects, which is the number of differing bits.
+    :param bytes_in1: Either ASCII string or list of integers, representing one byte each.
+    :param bytes_in2:
+    :return: Integer number of differing bits between the two objects
     """
-    assert len(string2) == len(string1), "String lengths are not equal"
-    bin1: List[int] = [int(d) for d in str_to_binary(string1)]
-    bin2: List[int] = [int(d) for d in str_to_binary(string2)]
+    assert len(bytes_in2) == len(bytes_in1), "Input lengths are not equal"
+    if isinstance(bytes_in1, str):
+        bin1: List[int] = [int(d) for d in str_to_binary(bytes_in1)]
+    else:
+        bin1: List[int] = bytes_in1
+    if isinstance(bytes_in2, str):
+        bin2: List[int] = [int(d) for d in str_to_binary(bytes_in2)]
+    else:
+        bin2: List[int] = bytes_in2
     dist: int = sum(np.array(bin1) ^ np.array(bin2))
     return dist
 
 
-
+def norm_keysize(bytes_in, block_size: int) -> float:
+    """
+    Calculates normalised Hamming distance as step in finding the best keysize to decode a ciphertext.
+    Takes first two pairs of byte blocks and calculates their Hamming distance, averages and normalises by block length
+    :param block_size: Number of bytes to include in each block
+    :param bytes_in: List of bytes to assess keysize suitability on
+    # :param pairs: Number of pairs of blocks to average
+    :return: Normalised Hamming distance
+    """
+    pair1 = (bytes_in[block_size * 0:block_size * 1], bytes_in[block_size * 1:block_size * 2])
+    pair2 = (bytes_in[block_size * 2:block_size * 3], bytes_in[block_size * 3:block_size * 4])
+    norm_keysize: float = (hamming_dist(pair1[0], pair1[1]) + hamming_dist(pair2[0], pair2[1])) / block_size
+    return norm_keysize
