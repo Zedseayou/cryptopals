@@ -113,7 +113,7 @@ def freq_BC(string_in: str, freq_compare=np.array(list(eng_freq.values())) / 100
     return bcoef
 
 
-def best_eng_onebyte(bytes_obj: bytes) -> pd.Series:
+def best_eng_onebyte(bytes_obj: bytes, n_return: int):
     """
     Return the output from the best single-byte XOR for a string.
     :param bytes_obj:
@@ -126,7 +126,7 @@ def best_eng_onebyte(bytes_obj: bytes) -> pd.Series:
     df = df.assign(xored_bytes=df.xor_int.apply(lambda x: onebyte_xor(bytes_obj, x)))
     df = df.assign(ascii_frac=df.xored_bytes.apply(ascii_hex))
     df = df.assign(xor_bcoef=df.xored_bytes.apply(lambda x: freq_BC(byte_to_str(x))))
-    return df.iloc[df.xor_bcoef.idxmax()]
+    return df.nlargest(n_return, "xor_bcoef")
 
 
 def flatten(nested_list: List) -> List:
