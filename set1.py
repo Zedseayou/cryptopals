@@ -18,8 +18,9 @@ def hex_to_b64(hex_string: str) -> str:
 
 def byte_to_str(bytes_obj: bytes) -> str:
     """Convert bytes object to string, removing header and trailing quote"""
-    byte_string: str = str(bytes_obj)
-    return byte_string.rstrip("'").lstrip("b'")
+    byte_chars: List[str] = [chr(i) for i in bytes_obj]
+    byte_string: str = "".join(byte_chars)
+    return byte_string
 
 
 def fixed_xor(bytes1: bytes, bytes2: bytes) -> bytes:
@@ -139,22 +140,21 @@ def flatten(nested_list: List) -> List:
     return flat_list
 
 
-def repeat_xor(string_in: str, key: str) -> bytes:
+def repeat_xor(bytes_in: bytes, key: str) -> bytes:
     """
-    Encode a string using repeating-key XOR.
-    :param string_in: A plaintext ASCII string to be encrypted.
+    Encode bytes using repeating-key XOR.
+    :param bytes_in: Input bytes object to encode
     :param key: A plaintext ASCII key to encode the string with.
-    :return: A bytes object containing the encoded bytes, in hex representation
+    :return: A bytes object containing the encoded bytes
     """
-    string_ints: List[int] = [i for i in bytes(string_in, "ASCII")]
+    # bytes_in: List[int] = [i for i in bytes(bytes_in, "ASCII")]
     key_ints: List[int] = [i for i in bytes(key, "ASCII")]
-    repetitions: int = len(string_ints) // len(key_ints)
-    remainder: int = len(string_ints) % len(key_ints)
+    repetitions: int = len(bytes_in) // len(key_ints)
+    remainder: int = len(bytes_in) % len(key_ints)
     rep_key_ints: List[int] = flatten(list(itertools.repeat(key_ints, times=repetitions))) + key_ints[0:remainder]
-    assert len(string_ints) == len(rep_key_ints), "Arrays are not equal length (internal bug)"
-    xor_int: List[int] = [int(i[0] ^ i[1]) for i in zip(string_ints, rep_key_ints)]
-    xor_hex = ba.b2a_hex(bytes(xor_int))
-    return xor_hex
+    assert len(bytes_in) == len(rep_key_ints), "Arrays are not equal length (internal bug)"
+    xor_int: List[int] = [int(i[0] ^ i[1]) for i in zip(bytes_in, rep_key_ints)]
+    return bytes(xor_int)
 
 
 def int_to_binary(int_in: int) -> str:
@@ -211,3 +211,5 @@ def norm_keysize(bytes_in, block_size: int) -> float:
     pair2 = (bytes_in[block_size * 2:block_size * 3], bytes_in[block_size * 3:block_size * 4])
     norm_keysize: float = (hamming_dist(pair1[0], pair1[1]) + hamming_dist(pair2[0], pair2[1])) / block_size
     return norm_keysize
+
+
