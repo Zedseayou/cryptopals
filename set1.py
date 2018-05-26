@@ -198,18 +198,24 @@ def hamming_dist(bytes_in1, bytes_in2) -> int:
     return dist
 
 
-def norm_keysize(bytes_in, block_size: int) -> float:
+def norm_keysize(bytes_in, block_size: int, pairs: int) -> float:
     """
     Calculates normalised Hamming distance as step in finding the best keysize to decode a ciphertext.
     Takes first two pairs of byte blocks and calculates their Hamming distance, averages and normalises by block length
     :param block_size: Number of bytes to include in each block
     :param bytes_in: List of bytes to assess keysize suitability on
-    # :param pairs: Number of pairs of blocks to average
+    :param pairs: Number of pairs of blocks to average
     :return: Normalised Hamming distance
     """
-    pair1 = (bytes_in[block_size * 0:block_size * 1], bytes_in[block_size * 1:block_size * 2])
-    pair2 = (bytes_in[block_size * 2:block_size * 3], bytes_in[block_size * 3:block_size * 4])
-    norm_keysize: float = (hamming_dist(pair1[0], pair1[1]) + hamming_dist(pair2[0], pair2[1])) / block_size
-    return norm_keysize
+    df = pd.DataFrame({"pair": range(pairs)})
+    df = df.assign(blockpair=df.pair.apply(
+        lambda x: (bytes_in[block_size * x * 2:block_size * (x * 2 + 1)],
+                   bytes_in[block_size * (x * 2 + 1):block_size * (x * 2 + 2)])
+    ))
+    df = df.assign(hdist=df.blockpair.apply(
+        lambda x: hamming_dist(x[0], x[1])
+    ))
+    keysize: float = sum(df.hdist / block_size)
+    return keysize
 
 
