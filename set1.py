@@ -6,7 +6,8 @@ import pandas as pd
 import string
 import re
 import itertools
-from math import sqrt
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
 
 def hex_to_b64(hex_string: str) -> str:
@@ -217,5 +218,24 @@ def norm_keysize(bytes_in, block_size: int, pairs: int) -> float:
     ))
     keysize: float = sum(df.hdist / block_size)
     return keysize
+
+
+def aes_ecb(text: bytes, key: bytes, encrypt: bool = True) -> bytes:
+    """
+    Encrypts or decrypts with AES-ECB given a text and a key in bytes
+    :param encrypt: Toggle to encrypt or decrypt the text
+    :param text:
+    :param key: Key needs to be 128, 192 or 256 bits long.
+    :return: Bytes object containing the encrypted or decrypted output
+    """
+    cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=default_backend())
+    if encrypt:
+        encryptor = cipher.encryptor()
+        encrypted: bytes = encryptor.update(text) + encryptor.finalize()
+        return encrypted
+    else:
+        decryptor = cipher.decryptor()
+        decrypted: bytes = decryptor.update(text) + decryptor.finalize()
+        return decrypted
 
 
